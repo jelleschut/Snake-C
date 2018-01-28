@@ -11,18 +11,19 @@
 #include "position.h"
 
 
-char checkBorderCollision(int position[2])
+int borderCollision()
 {
+   int Y = positionHeadY();
+   int X = positionHeadX();
 
-   if(position[0] <= 1 || position[0] >= 38)
+   if(Y <= 1 || Y >= 38)
    {
-      return '*';
+      return 1;
    }
-   if(position[1] <= 1 || position[1] >= 38)
+   if(X <= 1 || X >= 38)
    {
-      return '*';
+      return 1;
    }
-
-   return 'G';
+   return 0;
 }
 

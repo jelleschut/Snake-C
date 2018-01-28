@@ -2,6 +2,8 @@
 #define POSITION_H
 
 void move(int direction);
-void positionHead(int direction[2]);
+void positionHead();
+int positionHeadY();
+int positionHeadX();
 
 #endif // POSITION_H

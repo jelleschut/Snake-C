@@ -1,7 +1,3 @@
-#include "fsm.h"
-#include "keyboard.h"
-#include "display.h"
-#include "position.h"
 #include <conio.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,19 +6,18 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define DELAY 250000
+#include "macros.h"
+#include "fsm.h"
+#include "keyboard.h"
+#include "display.h"
+#include "position.h"
 
 STATES previousState;
 STATES nextState;
 STATES currentState = ST_INITIALISE;
 EVENTS event = EVT_NO;
 int score = 0;
-int none = 0;
-int up = 1;
-int right = 2;
-int down = 3;
-int left = 4;
-int start = 5;
+
 int direction;
 
 void eventhandler(EVENTS event)
@@ -34,6 +29,7 @@ void eventhandler(EVENTS event)
       case ST_NO:
          printf("error\n");
          break;
+
 
       case ST_INITIALISE:
          displayMenu();
@@ -63,26 +59,27 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_GAME_START:
-         printf("begin start: direction = %d\n", direction);
-         move(start);
+         printf("begin START: direction = %d\n", direction);
+         move(START);
+         displaySnake();
          event = keyboardInput();
          switch(event)
          {
             case EVT_KEY_UP:
                nextState = ST_SNAKE_UP;
-               direction = up;
+               direction = UP;
                break;
             case EVT_KEY_RIGHT:
                nextState = ST_SNAKE_RIGHT;
-               direction = right;
+               direction = RIGHT;
                break;
             case EVT_KEY_DOWN:
                nextState = ST_SNAKE_DOWN;
-               direction = down;
+               direction = DOWN;
                break;
             case EVT_KEY_LEFT:
                nextState = ST_SNAKE_RIGHT;
-               direction = right;
+               direction = RIGHT;
                break;
             default:
                nextState = ST_GAME_START;
@@ -90,18 +87,19 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_UP:
-         move(up);
+         move(UP);
+         displaySnake();
          usleep(DELAY);
          event = keyboardMovement();
          switch(event)
          {
             case EVT_KEY_RIGHT:
                nextState = ST_SNAKE_RIGHT;
-               direction = right;
+               direction = RIGHT;
                break;
             case EVT_KEY_LEFT:
                nextState = ST_SNAKE_LEFT;
-               direction = left;
+               direction = LEFT;
                break;
             case EVT_KEY_M:
                nextState = ST_CONFIRM_M;
@@ -119,18 +117,19 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_RIGHT:
-         move(right);
+         move(RIGHT);
+         displaySnake();
          usleep(DELAY);
          event = keyboardMovement();
          switch(event)
          {
             case EVT_KEY_UP:
                nextState = ST_SNAKE_UP;
-               direction = up;
+               direction = UP;
                break;
             case EVT_KEY_DOWN:
                nextState = ST_SNAKE_DOWN;
-               direction = down;
+               direction = DOWN;
                break;
             case EVT_KEY_M:
                nextState = ST_CONFIRM_M;
@@ -148,18 +147,19 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_DOWN:
-         move(down);
+         move(DOWN);
+         displaySnake();
          usleep(DELAY);
          event = keyboardMovement();
          switch(event)
          {
             case EVT_KEY_RIGHT:
                nextState = ST_SNAKE_RIGHT;
-               direction = right;
+               direction = RIGHT;
                break;
             case EVT_KEY_LEFT:
                nextState = ST_SNAKE_LEFT;
-               direction = left;
+               direction = LEFT;
                break;
             case EVT_KEY_M:
                nextState = ST_CONFIRM_M;
@@ -177,18 +177,19 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_LEFT:
-         move(left);
+         move(LEFT);
+         displaySnake();
          usleep(DELAY);
          event = keyboardMovement();
          switch(event)
          {
             case EVT_KEY_UP:
                nextState = ST_SNAKE_UP;
-               direction = up;
+               direction = UP;
                break;
             case EVT_KEY_DOWN:
                nextState = ST_SNAKE_DOWN;
-               direction = down;
+               direction = DOWN;
                break;
             case EVT_KEY_M:
                nextState = ST_CONFIRM_M;
@@ -248,7 +249,7 @@ void eventhandler(EVENTS event)
             switch(event)
             {
                case EVT_KEY_UP:
-                  if(direction != down)
+                  if(direction != DOWN)
                   {
                      nextState = ST_GAME_RUN;
                      direction = up;
@@ -259,10 +260,10 @@ void eventhandler(EVENTS event)
                   }
                   break;
                case EVT_KEY_RIGHT:
-                  if(direction != left)
+                  if(direction != LEFT)
                   {
                      nextState = ST_GAME_RUN;
-                     direction = right;
+                     direction = RIGHT;
                   }
                   else
                   {
@@ -273,7 +274,7 @@ void eventhandler(EVENTS event)
                   if(direction != up)
                   {
                      nextState = ST_GAME_RUN;
-                     direction = down;
+                     direction = DOWN;
                   }
                   else
                   {
@@ -281,10 +282,10 @@ void eventhandler(EVENTS event)
                   }
                   break;
                case EVT_KEY_LEFT :
-                  if(direction != right)
+                  if(direction != RIGHT)
                   {
                      nextState = ST_GAME_RUN;
-                     direction = left;
+                     direction = LEFT;
                   }
                   else
                   {
