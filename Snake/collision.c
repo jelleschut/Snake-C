@@ -9,7 +9,12 @@
 #include "display.h"
 #include "fsm.h"
 #include "position.h"
+#include "display.h"
+#include "macros.h"
 
+int foodPositionY = 0;
+int foodPositionX = 0;
+int i;
 
 int borderCollision()
 {
@@ -27,3 +32,40 @@ int borderCollision()
    return 0;
 }
 
+void foodSpawnCollision()
+{
+   foodPositionY = positionFoodY();
+   foodPositionX = positionFoodX();
+
+   for (i = 0; i < SNAKELENGTH + score; i++)
+   {
+      if((foodPositionY == snakeY[i]) && (foodPositionX == snakeX[i]))
+      {
+         randomFoodY();
+         randomFoodX();
+         foodPositionY = positionFoodY();
+         foodPositionX = positionFoodX();
+         i = 0;
+
+      }
+   }
+}
+
+int foodNoCollisionY()
+{
+   return foodPositionY;
+}
+
+int foodNoCollisionX()
+{
+   return foodPositionX;
+}
+
+void foodCollision()
+{
+   if((foodPositionY == snakeY[0]) && (foodPositionX == snakeX[0]))
+   {
+      foodSpawnCollision();
+      score++;
+   }
+}

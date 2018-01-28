@@ -16,7 +16,6 @@ STATES previousState;
 STATES nextState;
 STATES currentState = ST_INITIALISE;
 EVENTS event = EVT_NO;
-int score = 0;
 
 int direction;
 

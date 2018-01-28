@@ -10,15 +10,15 @@
 #include "position.h"
 #include "collision.h"
 #include "macros.h"
+#include "snakebody.h"
 
 int i,j;
 int startPos = 1;
-int X = STARTX;
-int Y = STARTY;
 char display[HEIGHT][WIDTH];                         // actual playing field in characters
-char border = LEDBORDER;                                    // borders have red (R) LEDs
-char field = LEDOFF;                                        // field LEDs are off
-char snake = LEDSNAKE;                                      // Snake LEDS are green (G)
+int snakeY[255];
+int snakeX[255];
+int score = 0;
+
 
 //-----------------------------------------------------------------------------------------------------//
 // Basic screen functions
@@ -44,25 +44,25 @@ void standardDisplay(void)
    {
       for(j = 0; j < WIDTH; j++)
       {
-         if(i < 2)                                       // top 2 lines are borders
+         if(i < BORDERTHICK)                                       // top 2 lines are borders
          {
-            display[i][j] = border;
+            display[i][j] = LEDBORDER;
          }
-         if(i >= HEIGHT - 2 && i < HEIGHT)               // bottom 2 lines are borders
+         if(i >= HEIGHT - BORDERTHICK && i < HEIGHT)               // bottom 2 lines are borders
          {
-            display[i][j] = border;
+            display[i][j] = LEDBORDER;
          }
-         if(j < 2)                                       // first 2 columns are borders
+         if(j < BORDERTHICK)                                       // first 2 columns are borders
          {
-            display[i][j] = border;
+            display[i][j] = LEDBORDER;
          }
-         if(j >= WIDTH - 2 && i < WIDTH)                 // last 2 borders are columns
+         if(j >= WIDTH - BORDERTHICK && i < WIDTH)                 // last 2 borders are columns
          {
-            display[i][j] = border;
+            display[i][j] = LEDBORDER;
          }
-         if((i >= 2 && i < HEIGHT-2) && (j >= 2 && j < WIDTH-2))  // area between borders is playingfield
+         if((i >= BORDERTHICK && i < HEIGHT - BORDERTHICK) && (j >= BORDERTHICK && j < WIDTH - BORDERTHICK))  // area between borders is playingfield
          {
-            display[i][j] = field;
+            display[i][j] = LEDOFF;
          }
       }
    }
@@ -132,7 +132,7 @@ void displayShutDown(void)
    {
       for(j = 0; j < WIDTH; j++)
       {
-         display[i][j] = field;
+         display[i][j] = LEDOFF;
       }
    }
    printField();
@@ -144,20 +144,9 @@ void displayShutDown(void)
 //-----------------------------------------------------------------------------------------------------//
 //Display Snake
 
-//snake position
-void addToDisplay(int Y, int X, char LED)
+
+void displaySnakePosition()
 {
-   display[Y][X] = LED;
-   //printf("%c", display[i][j]);
-}
-
-void displaySnake()
-{
-   int snakeY[255];
-   int snakeX[255];
-
-   standardDisplay();                                 // using standarddisplay to set background
-
    if (startPos == 1)
    {
       for(i = 1; i < SNAKELENGTH; i++)
@@ -169,24 +158,43 @@ void displaySnake()
          display[snakeY[i]][snakeX[i]] = LEDSNAKE;
 
       }
+      foodSpawnCollision();
+      int Y = foodNoCollisionY();
+      int X = foodNoCollisionX();
+
+      display[Y][X] = LEDCOLLISON;
    }
 
    if (startPos == 0)
    {
-      for(i = SNAKELENGTH; i > 0; i--)
+      for(i = SNAKELENGTH + score; i > 0; i--)
       {
          snakeY[i] = snakeY[i-1];
          snakeX[i] = snakeX[i-1];
 
          display[snakeY[i]][snakeX[i]] = LEDSNAKE;
       }
-      display[snakeY[SNAKELENGTH]][snakeX[SNAKELENGTH]] = LEDOFF;
+      display[snakeY[SNAKELENGTH + score]][snakeX[SNAKELENGTH + score]] = LEDOFF;
+      int Y = foodNoCollisionY();
+      int X = foodNoCollisionX();
+
+      display[Y][X] = LEDCOLLISON;
    }
 
    startPos = 0;
 
    snakeY[0] = positionHeadY();
    snakeX[0] = positionHeadX();
+}
+
+
+void displaySnake()
+{
+   standardDisplay();                                 // using standarddisplay to set background
+
+   displaySnakePosition();
+
+   foodCollision();
 
    if (borderCollision() == 1)
    {

@@ -2,6 +2,9 @@
 #define COLLISION_H
 
 int borderCollision();
-STATES checkGameOver(STATES currentState);
+void foodSpawnCollision();
+int foodNoCollisionY();
+int foodNoCollisionX();
+void foodCollision();
 
 #endif // COLLISION_H
