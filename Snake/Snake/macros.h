@@ -2,11 +2,12 @@
 #define MACROS_H
 
 //DELAY
-#define DELAY 250000
+#define DELAY 125000
 
 //DISPLAY MACROS
 #define HEIGHT       16
 #define WIDTH        40
+#define BORDERTHICK  2
 #define LEDBORDER    'R'
 #define LEDSNAKE     'G'
 #define LEDCOLLISON  'Y'

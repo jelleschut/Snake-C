@@ -1,7 +1,8 @@
 #ifndef SNAKEBODY_H
 #define SNAKEBODY_H
 
-void startSnake();
+int snakeBodyY(int count);
+int snakeBodyX(int count);
 
 
 #endif // SNAKEBODY_H

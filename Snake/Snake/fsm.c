@@ -11,12 +11,12 @@
 #include "keyboard.h"
 #include "display.h"
 #include "position.h"
+#include "collision.h"
 
 STATES previousState;
 STATES nextState;
 STATES currentState = ST_INITIALISE;
 EVENTS event = EVT_NO;
-int score = 0;
 
 int direction;
 
@@ -239,11 +239,18 @@ void eventhandler(EVENTS event)
          }
          break;
 
-
-        case ST_GAME_OVER:
-         nextState = ST_INITIALISE;
+      case ST_GAME_OVER:
+         displayGameOver();
+         event = keyboardInput();
+         switch(event)
+         {
+            case EVT_KEY_Y:
+               nextState = ST_INITIALISE;
+               break;
+            default:
+               nextState = ST_GAME_OVER;
+         }
          break;
-
          /*case ST_PAUSE:
             displaySnake(none);
             switch(event)
@@ -294,7 +301,6 @@ void eventhandler(EVENTS event)
                   
                   
             }*/
-
 
    }
    printf("%d\n",currentState);

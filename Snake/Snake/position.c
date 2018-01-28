@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <time.h>
 
 #include "display.h"
 #include "macros.h"
@@ -12,6 +13,8 @@
 
 int snakeHeadY = STARTY;
 int snakeHeadX = STARTX;
+int randFoodY;
+int randFoodX;
 int movement[2] = {0,0};
 int start = 0;
 
@@ -28,7 +31,6 @@ void positionHead()
    if(start == 1)
    {
       positionStart();
-      startSnake();
       start = 0;
    }
 
@@ -79,5 +81,27 @@ int positionHeadY()
 int positionHeadX()
 {
    return snakeHeadX;
+}
+
+void randomFoodY()
+{
+   srand(time(NULL));
+   randFoodY = rand() % (HEIGHT - (2 * BORDERTHICK)) + BORDERTHICK;
+}
+
+int positionFoodY()
+{
+   return randFoodY;
+}
+
+void randomFoodX()
+{
+   srand(time(NULL));
+   randFoodX = rand() % (WIDTH - (2 * BORDERTHICK)) + BORDERTHICK;
+}
+
+int positionFoodX()
+{
+   return randFoodX;
 }
 
