@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "display.h"
+
 #include "fsm.h"
 
 int main()

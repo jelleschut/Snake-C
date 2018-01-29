@@ -3,10 +3,10 @@
 
 typedef enum
 {
+   /* EVENTHANDLER STATES  */
    ST_NO,
    ST_SHUT_DOWN,
    ST_INITIALISE,
-   ST_MENU,
    ST_GAME_START,
    ST_GAME_RUN,
    ST_GAME_OVER,
@@ -17,11 +17,46 @@ typedef enum
    ST_CONFIRM_M,
    ST_CONFIRM_R,
    ST_CONFIRM_Q,
-   ST_PAUSE
+   ST_PAUSE,
+   ST_MODE_0,
+   ST_MODE_1,
+   //----------------------//
+
+   /* COLLISION STATES     */
+   ST_COLLISION,
+   ST_NO_COLLISION,
+   ST_GROW,
+   //----------------------//
+
+   /* DISPLAY STATES       */
+   ST_DISPLAY_STANDBY,
+   ST_DISPLAY_SHUT_DOWN,
+   ST_DISPLAY_MAIN_MENU,
+   ST_DISPLAY_CONFIRM_MENU,
+   ST_DISPLAY_CONFIRM_RESET,
+   ST_DISPLAY_PAUSE,
+   ST_DISPLAY_GAME_OVER,
+   ST_DISPLAY_GAME_START,
+   ST_DISPLAY_SNAKE,
+   ST_DISPLAY_STANDARD,
+   ST_DISPLAY_READY,
+   ST_DISPLAY_NOT_READY,
+   //----------------------//
+
+   /* POSITION STATES      */
+   ST_START_POSITION,
+   ST_MOVE_UP,
+   ST_MOVE_DOWN,
+   ST_MOVE_LEFT,
+   ST_MOVE_RIGHT,
+   ST_MOVE_STOP,
+   //----------------------//
+
 }  STATES;
 
 typedef enum
 {
+   /*EVENTHANDLER EVENTES  */
    EVT_NO,
    EVT_START_GAME,
    EVT_SHUT_DOWN,
@@ -35,8 +70,44 @@ typedef enum
    EVT_KEY_X,
    EVT_KEY_Y,
    EVT_KEY_N,
+   EVT_MODE_0,
+   EVT_MODE_1,
+   //----------------------//
+
+   /* COLLISION EVENTS     */
+   EVT_NO_FOOD_COLLISION,
+   EVT_NO_BORDER_COLLISION,
+   EVT_NO_SELF_COLLISION,
+   EVT_BORDER_COLLISION,
+   EVT_SELF_COLLISION,
+   EVT_FOOD_SPAWN_COLLISION,
+   EVT_FOOD_SPAWN_NO_COLLISION,
+   EVT_FOOD_COLLISION,
+   EVT_COLLISION,
+   EVT_NO_COLLISION,
+   //----------------------//
+
+   /* DISPLAY EVENTS       */
+   EVT_DISPLAY_COLLISION,
+   EVT_DISPLAY_SNAKE_POSITION,
+   EVT_DISPLAY_NEW_FOOD,
+   EVT_DISPLAY_FOOD,
+   //----------------------//
+
+   /* POSITION EVENTS      */
+   EVT_SET_START_POSITION,
+   EVT_CHANGE_DIRECTION_UP,
+   EVT_CHANGE_DIRECTION_DOWN,
+   EVT_CHANGE_DIRECTION_LEFT,
+   EVT_CHANGE_DIRECTION_RIGHT,
+   EVT_START_POSITION,
+   EVT_PAUSE_POSITION,
+   EVT_NEW_FOOD_POSITION,
+   //----------------------//
+
 }  EVENTS;
 
+extern STATES mode;
 void eventhandler(EVENTS event);
 
 #endif // SNAKE_H

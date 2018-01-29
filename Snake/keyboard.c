@@ -1,12 +1,8 @@
-#include "fsm.h"
-#include <dos.h>
 #include <conio.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <ctype.h>
+
+#include "fsm.h"
 
 EVENTS keyboardInput(void)
 {
@@ -55,6 +51,13 @@ EVENTS keyboardInput(void)
       case '2':
          event = EVT_SHUT_DOWN;
          break;
+      case ')':
+         event = EVT_MODE_0;
+         break;
+      case '!':
+         event = EVT_MODE_1;
+         break;
+      default:
          event = EVT_NO;
    }
    return event;
@@ -64,7 +67,7 @@ EVENTS keyboardInput(void)
 EVENTS keyboardMovement(void)
 {
    EVENTS event;
-   char input;
+   char input, inputLowerCase;
 
    fflush(stdin);
    if(kbhit())
@@ -72,7 +75,9 @@ EVENTS keyboardMovement(void)
       input = getch();
    }
 
-   switch(input)
+      inputLowerCase = tolower(input);
+
+   switch(inputLowerCase)
    {
       case 'w':
          event = EVT_KEY_UP;

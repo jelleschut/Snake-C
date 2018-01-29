@@ -1,23 +1,22 @@
-#include <conio.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #include "macros.h"
-#include "fsm.h"
 #include "keyboard.h"
 #include "display.h"
 #include "position.h"
+#include "collision.h"
 
 STATES previousState;
+STATES returnState = 0;
 STATES nextState;
 STATES currentState = ST_INITIALISE;
+STATES mode;
+
 EVENTS event = EVT_NO;
 
-int direction;
+
+EVENTS nextEvent();
 
 void eventhandler(EVENTS event)
 {
@@ -31,7 +30,8 @@ void eventhandler(EVENTS event)
 
 
       case ST_INITIALISE:
-         displayMenu();
+         score = 0;
+         displayScreen(currentState);
          event = keyboardInput();
          switch(event)
          {
@@ -41,44 +41,55 @@ void eventhandler(EVENTS event)
             case EVT_SHUT_DOWN:
                nextState = ST_SHUT_DOWN;
                break;
+            case EVT_MODE_0:
+               mode = ST_MODE_0;
+               nextState = ST_INITIALISE;
+               break;
+            case EVT_MODE_1:
+               mode = ST_MODE_1;
+               nextState = ST_INITIALISE;
+               break;
             default:
                nextState = ST_INITIALISE;
          }
          break;
 
       case ST_SHUT_DOWN:
-         displayShutDown();
+         displayScreen(currentState);
          event = keyboardInput();
          switch(event)
          {
             case EVT_KEY_X:
                nextState = ST_INITIALISE;
                break;
+            default:
+               nextState = ST_SHUT_DOWN;
          }
          break;
 
       case ST_GAME_START:
-         printf("begin START: direction = %d\n", direction);
-         move(START);
-         displaySnake();
+         move(EVT_START_POSITION);
+         displayScreen(currentState);
          event = keyboardInput();
          switch(event)
          {
             case EVT_KEY_UP:
                nextState = ST_SNAKE_UP;
-               direction = UP;
                break;
             case EVT_KEY_RIGHT:
                nextState = ST_SNAKE_RIGHT;
-               direction = RIGHT;
                break;
             case EVT_KEY_DOWN:
                nextState = ST_SNAKE_DOWN;
-               direction = DOWN;
                break;
             case EVT_KEY_LEFT:
                nextState = ST_SNAKE_RIGHT;
-               direction = RIGHT;
+               break;
+            case EVT_KEY_R:
+               nextState = ST_CONFIRM_R;
+               break;
+            case EVT_KEY_M:
+               nextState = ST_CONFIRM_M;
                break;
             default:
                nextState = ST_GAME_START;
@@ -86,28 +97,33 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_UP:
-         move(UP);
-         displaySnake();
+         move(EVT_CHANGE_DIRECTION_UP);
+         displayScreen(currentState);
          usleep(DELAY);
-         event = keyboardMovement();
+         event = nextEvent();
          switch(event)
          {
             case EVT_KEY_RIGHT:
                nextState = ST_SNAKE_RIGHT;
-               direction = RIGHT;
                break;
             case EVT_KEY_LEFT:
+               returnState = currentState;
                nextState = ST_SNAKE_LEFT;
-               direction = LEFT;
                break;
             case EVT_KEY_M:
+               returnState = currentState;
                nextState = ST_CONFIRM_M;
                break;
             case EVT_KEY_R:
+               returnState = currentState;
                nextState = ST_CONFIRM_R;
                break;
             case EVT_KEY_P:
+               returnState = currentState;
                nextState = ST_PAUSE;
+               break;
+            case EVT_COLLISION:
+               nextState = ST_GAME_OVER;
                break;
             default:
                nextState = ST_SNAKE_UP;
@@ -116,28 +132,32 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_RIGHT:
-         move(RIGHT);
-         displaySnake();
+         move(EVT_CHANGE_DIRECTION_RIGHT);
+         displayScreen(currentState);
          usleep(DELAY);
-         event = keyboardMovement();
+         event = nextEvent();
          switch(event)
          {
             case EVT_KEY_UP:
                nextState = ST_SNAKE_UP;
-               direction = UP;
                break;
             case EVT_KEY_DOWN:
                nextState = ST_SNAKE_DOWN;
-               direction = DOWN;
                break;
             case EVT_KEY_M:
+               returnState = currentState;
                nextState = ST_CONFIRM_M;
                break;
             case EVT_KEY_R:
+               returnState = currentState;
                nextState = ST_CONFIRM_R;
                break;
             case EVT_KEY_P:
+               returnState = currentState;
                nextState = ST_PAUSE;
+               break;
+            case EVT_COLLISION:
+               nextState = ST_GAME_OVER;
                break;
             default:
                nextState = ST_SNAKE_RIGHT;
@@ -146,28 +166,32 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_DOWN:
-         move(DOWN);
-         displaySnake();
+         move(EVT_CHANGE_DIRECTION_DOWN);
+         displayScreen(currentState);
          usleep(DELAY);
-         event = keyboardMovement();
+         event = nextEvent();
          switch(event)
          {
             case EVT_KEY_RIGHT:
                nextState = ST_SNAKE_RIGHT;
-               direction = RIGHT;
                break;
             case EVT_KEY_LEFT:
                nextState = ST_SNAKE_LEFT;
-               direction = LEFT;
                break;
             case EVT_KEY_M:
+               returnState = currentState;
                nextState = ST_CONFIRM_M;
                break;
             case EVT_KEY_R:
+               returnState = currentState;
                nextState = ST_CONFIRM_R;
                break;
             case EVT_KEY_P:
+               returnState = currentState;
                nextState = ST_PAUSE;
+               break;
+            case EVT_COLLISION:
+               nextState = ST_GAME_OVER;
                break;
             default:
                nextState = ST_SNAKE_DOWN;
@@ -176,28 +200,32 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_SNAKE_LEFT:
-         move(LEFT);
-         displaySnake();
+         move(EVT_CHANGE_DIRECTION_LEFT);
+         displayScreen(currentState);
          usleep(DELAY);
-         event = keyboardMovement();
+         event = nextEvent();
          switch(event)
          {
             case EVT_KEY_UP:
                nextState = ST_SNAKE_UP;
-               direction = UP;
                break;
             case EVT_KEY_DOWN:
                nextState = ST_SNAKE_DOWN;
-               direction = DOWN;
                break;
             case EVT_KEY_M:
+               returnState = currentState;
                nextState = ST_CONFIRM_M;
                break;
             case EVT_KEY_R:
+               returnState = currentState;
                nextState = ST_CONFIRM_R;
                break;
             case EVT_KEY_P:
+               returnState = currentState;
                nextState = ST_PAUSE;
+               break;
+            case EVT_COLLISION:
+               nextState = ST_GAME_OVER;
                break;
             default:
                nextState = ST_SNAKE_LEFT;
@@ -206,12 +234,12 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_CONFIRM_M:
-         displayConfirmMenu();
+         displayScreen(currentState);
          event = keyboardInput();
          switch(event)
          {
             case EVT_KEY_N:
-               nextState = ST_SNAKE_UP;
+               nextState = ST_PAUSE;
                break;
             case EVT_KEY_Y:
                nextState = ST_INITIALISE;
@@ -222,13 +250,12 @@ void eventhandler(EVENTS event)
          break;
 
       case ST_CONFIRM_R:
-
-         displayConfirmReset();
+         displayScreen(currentState);
          event = keyboardInput();
          switch(event)
          {
             case EVT_KEY_N:
-               nextState = ST_SNAKE_UP;
+               nextState = ST_PAUSE;
                break;
             case EVT_KEY_Y:
                nextState = ST_GAME_START;
@@ -238,66 +265,57 @@ void eventhandler(EVENTS event)
          }
          break;
 
-
-        case ST_GAME_OVER:
-         nextState = ST_INITIALISE;
+      case ST_GAME_OVER:
+         displayScreen(currentState);
+         event = keyboardInput();
+         switch(event)
+         {
+            case EVT_KEY_Y:
+               nextState = ST_INITIALISE;
+               break;
+            default:
+               nextState = ST_GAME_OVER;
+         }
          break;
 
-         /*case ST_PAUSE:
-            displaySnake(none);
-            switch(event)
-            {
-               case EVT_KEY_UP:
-                  if(direction != DOWN)
-                  {
-                     nextState = ST_GAME_RUN;
-                     direction = up;
-                  }
-                  else
-                  {
-                     nextState = ST_PAUSE;
-                  }
-                  break;
-               case EVT_KEY_RIGHT:
-                  if(direction != LEFT)
-                  {
-                     nextState = ST_GAME_RUN;
-                     direction = RIGHT;
-                  }
-                  else
-                  {
-                     nextState = ST_PAUSE;
-                  }
-                  break;
-               case EVT_KEY_DOWN:
-                  if(direction != up)
-                  {
-                     nextState = ST_GAME_RUN;
-                     direction = DOWN;
-                  }
-                  else
-                  {
-                     nextState = ST_PAUSE;
-                  }
-                  break;
-               case EVT_KEY_LEFT :
-                  if(direction != RIGHT)
-                  {
-                     nextState = ST_GAME_RUN;
-                     direction = LEFT;
-                  }
-                  else
-                  {
-                     nextState = ST_PAUSE;
-                  }
-                  
-                  
-            }*/
-
+      case ST_PAUSE:
+         move(EVT_PAUSE_POSITION);
+         displayScreen(currentState);
+         event = keyboardInput();
+         switch(event)
+         {
+            case EVT_KEY_M:
+               nextState = ST_CONFIRM_M;
+               break;
+            case EVT_KEY_R:
+               nextState = ST_CONFIRM_R;
+               break;
+            case EVT_KEY_P:
+               nextState = returnState;
+               break;
+            default:
+               nextState = ST_PAUSE;
+         }
+         break;
+      default:
+         printf("default");
+         nextState = ST_NO;
 
    }
-   printf("%d\n",currentState);
+   printf("score: %d\n", score);
    currentState = nextState;
 }
 
 
+
+
+EVENTS nextEvent()
+{
+   EVENTS next = keyboardMovement();
+   if(collisionChecker() == EVT_COLLISION)
+   {
+      next = EVT_COLLISION;
+   }
+
+   return next;
+}

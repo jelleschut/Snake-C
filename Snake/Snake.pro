@@ -8,8 +8,7 @@ SOURCES += main.c \
     display.c \
     keyboard.c \
     collision.c \
-    position.c \
-    snakebody.c
+    position.c
 
 HEADERS += \
     fsm.h \
@@ -17,5 +16,4 @@ HEADERS += \
     keyboard.h \
     collision.h \
     position.h \
-    macros.h \
-    snakebody.h
+    macros.h
