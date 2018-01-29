@@ -12,60 +12,86 @@
 #include "display.h"
 #include "macros.h"
 
-int foodPositionY = 0;
-int foodPositionX = 0;
+int foodY;
+int foodX;
 int i;
 
-int borderCollision()
+EVENTS borderCollision()
 {
    int Y = positionHeadY();
    int X = positionHeadX();
 
-   if(Y <= 1 || Y >= 38)
+   if(Y <= (BORDERTHICK - 1) || Y >= (HEIGHT - BORDERTHICK))
    {
-      return 1;
+      return EVT_BORDER_COLLISION;
    }
-   if(X <= 1 || X >= 38)
+   if(X <= (BORDERTHICK - 1) || X >= (WIDTH - BORDERTHICK))
    {
-      return 1;
+      return EVT_BORDER_COLLISION;
    }
-   return 0;
+   return EVT_NO_BORDER_COLLISION;
 }
 
-void foodSpawnCollision()
+EVENTS selfCollision()
 {
-   foodPositionY = positionFoodY();
-   foodPositionX = positionFoodX();
+   int Y = positionHeadY();
+   int X = positionHeadX();
+
+   for (i = 2; i < SNAKELENGTH + score; i++)
+   {
+      if(( Y == snakeY[i]) && ( X == snakeX[i]))
+      {
+         return EVT_SELF_COLLISION;
+      }
+   }
+   return EVT_NO_SELF_COLLISION;
+}
+
+EVENTS foodSpawnCollision()
+{
+   foodY = positionFoodY();
+   foodX = positionFoodX();
 
    for (i = 0; i < SNAKELENGTH + score; i++)
    {
-      if((foodPositionY == snakeY[i]) && (foodPositionX == snakeX[i]))
+      if(( foodY == snakeY[i]) && ( foodX == snakeX[i]))
       {
-         randomFoodY();
-         randomFoodX();
-         foodPositionY = positionFoodY();
-         foodPositionX = positionFoodX();
-         i = 0;
-
+           return EVT_FOOD_SPAWN_COLLISION;
       }
    }
+   return EVT_FOOD_SPAWN_NO_COLLISION;
 }
 
 int foodNoCollisionY()
 {
-   return foodPositionY;
+   return foodY;
 }
 
 int foodNoCollisionX()
 {
-   return foodPositionX;
+   return foodX;
 }
 
-void foodCollision()
+EVENTS foodCollision()
 {
-   if((foodPositionY == snakeY[0]) && (foodPositionX == snakeX[0]))
+   if((foodY == snakeY[0]) && (foodX == snakeX[0]))
    {
-      foodSpawnCollision();
-      score++;
+      return EVT_FOOD_COLLISION;
    }
+   return EVT_NO_FOOD_COLLISION;
+}
+
+EVENTS collisionChecker()
+{
+   if (borderCollision() == EVT_BORDER_COLLISION)
+   {
+      return EVT_COLLISION;
+   }
+
+   if(selfCollision() == EVT_SELF_COLLISION)
+   {
+      return EVT_COLLISION;
+   }
+
+   return EVT_NO_COLLISION;
 }

@@ -19,6 +19,7 @@ int snakeY[255];
 int snakeX[255];
 int score = 0;
 
+void screenShot();
 
 //-----------------------------------------------------------------------------------------------------//
 // Basic screen functions
@@ -34,7 +35,6 @@ void printField(void)
       }
       printf("\n");
    }
-   printf("\n\n\n\n\n\n\n\n\n\n\n");
 }
 
 //Empty display with borders
@@ -69,14 +69,17 @@ void standardDisplay(void)
 }
 
 //String writing function
-void writeString(int startX, int startY, char *string)
+void writeString(int startY, /*int startX,*/ char *string)
 {
    int lengthString  = strlen(string);
+   int startX = (WIDTH/2) - (lengthString/2);
 
    for (i = 0; i < lengthString; i++)
    {
-      display[startX][startY+i] = string[i];
+      display[startY][startX+i] = string[i];
    }
+
+
 }
 //end of basic screen functions
 //-----------------------------------------------------------------------------------------------------//
@@ -88,15 +91,25 @@ void writeString(int startX, int startY, char *string)
 //Main Menu
 void displayMenu(void)
 {
-   char newGame[20] = "1:.NEW.GAME";
-   char shutDown[20] = "2:.SHUT.DOWN";
+   char newGame[20]  = "1: NEW GAME ";
+   char shutDown[20] = "2: SHUT DOWN";
 
    standardDisplay();
 
-   writeString(6, 10, newGame);
-   writeString(10, 10, shutDown);
+   writeString(6, /*10,*/ newGame);
+   writeString(10, /*10,*/ shutDown);
+}
 
-   printField();
+//Return to main menu
+void displayPause(void)
+{
+   char gamePaused[40] = "GAME PAUSED";
+   char pressP[40] = "PRESS P TO CONTINUE";
+
+   screenShot();
+
+   writeString(7, /*4,*/ gamePaused);
+   writeString(9, /*18,*/ pressP);
 }
 
 //Return to main menu
@@ -106,11 +119,11 @@ void displayConfirmMenu(void)
    char toMainMenu[40] = "TO MAIN MENU?";
    char yesOrNo[20] = "Y / N";
 
-   writeString(7, 4, areYouSureReturn);
-   writeString(8, 14, toMainMenu);
-   writeString(9, 18, yesOrNo);
+   screenShot();
 
-   printField();
+   writeString(7, /*4,*/ areYouSureReturn);
+   writeString(8, /*14,*/ toMainMenu);
+   writeString(9, /*18,*/ yesOrNo);
 }
 
 //Reset menu
@@ -119,10 +132,27 @@ void displayConfirmReset(void)
    char areYouSureReset[40] = "ARE YOU SURE YOU WANT TO RESET?";
    char yesOrNo[20] = "Y / N";
 
-   writeString(7, 4, areYouSureReset);
-   writeString(9, 18, yesOrNo);
+   screenShot();
 
-   printField();
+   writeString(7,/* 4,*/ areYouSureReset);
+   writeString(9, /*18,*/ yesOrNo);
+
+}
+
+//Reset menu
+void displayGameOver(void)
+{
+   char gameOver[40] = "GAME OVER";
+   char finalScore[20] = "FINAL SCORE: ";
+   char pressContinue[20] = "PRESS Y TO CONTINUE";
+   char charScore[5];
+   itoa(score, charScore, 10);
+   strcat(finalScore, charScore);
+
+   writeString(5, /*15,*/ gameOver);
+   writeString(7, /*12,*/ finalScore);
+   writeString(9, /*11,*/ pressContinue);
+
 }
 
 //Display Off
@@ -135,76 +165,202 @@ void displayShutDown(void)
          display[i][j] = LEDOFF;
       }
    }
-   printField();
 }
-
 //End of display states
 //-----------------------------------------------------------------------------------------------------//
 
 //-----------------------------------------------------------------------------------------------------//
 //Display Snake
 
+void displayCollision(int Y, int X)
+{
+   display[Y-2][X+2] = LEDCOLLISON;
+   display[Y-2][X-2] = LEDCOLLISON;
+   display[Y-1][X-1] = LEDCOLLISON;
+   display[Y-1][X+1] = LEDCOLLISON;
+   display[Y][X] = LEDCOLLISON;
+   display[Y+1][X-1] = LEDCOLLISON;
+   display[Y+1][X+1] = LEDCOLLISON;
+   display[Y+2][X-2] = LEDCOLLISON;
+   display[Y+2][X+2] = LEDCOLLISON;
+   /*for(i = (Y - 1); i < (Y + 2); i++)
+      for(j = (X - 1); j < (X + 2); j++)
+      {
+         display[i][j] = LEDCOLLISON;
+      }*/
+}
+
+void displayNewFood()
+{
+   randomFoodX();
+   randomFoodY();
+
+   EVENTS spawnChecker = foodSpawnCollision();
+
+   while(spawnChecker == EVT_FOOD_SPAWN_COLLISION)
+   {
+      foodSpawnCollision();
+   }
+
+   int Y = foodNoCollisionY();
+   int X = foodNoCollisionX();
+
+   display[Y][X] = LEDFOOD;
+}
+
+void displayFood()
+{
+   int Y = foodNoCollisionY();
+   int X = foodNoCollisionX();
+
+   display[Y][X] = LEDFOOD;
+}
+
+
+void displaySnakeStartPosition()
+{
+
+   for(i = 0; i < SNAKELENGTH; i++)
+   {
+
+      snakeY[i] = STARTY;
+      snakeX[i] = STARTX-i;
+
+      display[snakeY[i]][snakeX[i]] = LEDSNAKE;
+
+   }
+}
 
 void displaySnakePosition()
 {
-   if (startPos == 1)
+
+   for(i = SNAKELENGTH + score; i > 0; i--)
    {
-      for(i = 1; i < SNAKELENGTH; i++)
-      {
+      snakeY[i] = snakeY[i-1];
+      snakeX[i] = snakeX[i-1];
 
-         snakeY[i] = STARTY;
-         snakeX[i] = STARTX-i;
-
-         display[snakeY[i]][snakeX[i]] = LEDSNAKE;
-
-      }
-      foodSpawnCollision();
-      int Y = foodNoCollisionY();
-      int X = foodNoCollisionX();
-
-      display[Y][X] = LEDCOLLISON;
+      display[snakeY[i]][snakeX[i]] = LEDSNAKE;
    }
-
-   if (startPos == 0)
-   {
-      for(i = SNAKELENGTH + score; i > 0; i--)
-      {
-         snakeY[i] = snakeY[i-1];
-         snakeX[i] = snakeX[i-1];
-
-         display[snakeY[i]][snakeX[i]] = LEDSNAKE;
-      }
-      display[snakeY[SNAKELENGTH + score]][snakeX[SNAKELENGTH + score]] = LEDOFF;
-      int Y = foodNoCollisionY();
-      int X = foodNoCollisionX();
-
-      display[Y][X] = LEDCOLLISON;
-   }
-
-   startPos = 0;
 
    snakeY[0] = positionHeadY();
    snakeX[0] = positionHeadX();
 }
 
+void screenShot()
+{
+   standardDisplay();
+   for(i = 0; i < SNAKELENGTH + score; i++)
+   {
+      display[snakeY[i]][snakeX[i]] = LEDSNAKE;
+   }
+   displayFood();
+}
+
+
+void displayStart()
+{
+   standardDisplay();
+   displaySnakeStartPosition();
+   displayNewFood();
+}
 
 void displaySnake()
 {
    standardDisplay();                                 // using standarddisplay to set background
-
    displaySnakePosition();
+   displayFood();
+}
 
-   foodCollision();
+void displayScreen(STATES currentState)
+{
+   STATES displayState = ST_DISPLAY_STANDBY;
 
-   if (borderCollision() == 1)
-   {
-      display[snakeY[0]][snakeX[0]] = LEDCOLLISON;
-   }
-   else
-   {
-      display[snakeY[0]][snakeX[0]] = LEDSNAKE;
-   }
+      switch(currentState)
+      {
+         case ST_SHUT_DOWN:
+            displayShutDown();
+            displayState = ST_DISPLAY_SHUT_DOWN;
+            break;
+
+         case ST_INITIALISE:
+            displayMenu();
+            displayState = ST_DISPLAY_MAIN_MENU;
+            break;
+
+         case ST_CONFIRM_M:
+            displayConfirmMenu();
+            displayState = ST_DISPLAY_CONFIRM_MENU;
+            break;
+
+         case ST_CONFIRM_R:
+            displayConfirmReset();
+            displayState = ST_DISPLAY_CONFIRM_RESET;
+            break;
+
+         case ST_PAUSE:
+            displayPause();
+            displayState = ST_DISPLAY_PAUSE;
+            break;
+
+         case ST_GAME_OVER:
+            displayGameOver();
+            displayState = ST_DISPLAY_GAME_OVER;
+            break;
+
+         case ST_GAME_START:
+            displayStart();
+            displayState = ST_DISPLAY_GAME_START;
+            break;
+
+         case ST_SNAKE_UP:
+            displaySnake();
+            displayState = ST_DISPLAY_SNAKE;
+            break;
+
+         case ST_SNAKE_DOWN:
+            displaySnake();
+            displayState = ST_DISPLAY_SNAKE;
+            break;
+
+         case ST_SNAKE_LEFT:
+            displaySnake();
+            displayState = ST_DISPLAY_SNAKE;
+            break;
+
+         case ST_SNAKE_RIGHT:
+            displaySnake();
+            displayState = ST_DISPLAY_SNAKE;
+            break;
+
+         default:
+            printf("Something went wrong!\n");
+            printf("Nothing to display!\n");
+      }
+
+
+      if(displayState == ST_DISPLAY_SNAKE)
+      {
+         EVENTS food = foodCollision();
+         EVENTS collision = collisionChecker();
+
+         if(food == EVT_FOOD_COLLISION)
+         {
+            score++;
+            displayNewFood();
+         }
+
+         if (collision == EVT_COLLISION)
+         {
+            displayCollision(snakeY[0], snakeX[0]);
+         }
+      }
    printField();
 }
+
+
+
+
+
+
 
 
