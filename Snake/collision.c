@@ -1,71 +1,86 @@
-#include <conio.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <ctype.h>
 
 #include "display.h"
 #include "fsm.h"
 #include "position.h"
-#include "display.h"
 #include "macros.h"
 
-int foodPositionY = 0;
-int foodPositionX = 0;
-int i;
+int foodY;
+int foodX;
 
-int borderCollision()
+
+EVENTS borderCollision()                                                ///Used to check for border collision
 {
-   int Y = positionHeadY();
-   int X = positionHeadX();
-
-   if(Y <= 1 || Y >= 38)
+   if(snakeY[0] < BORDERTHICK || snakeY[0] >= (HEIGHT - BORDERTHICK))   //if SNAKE head is in border
    {
-      return 1;
+      return EVT_BORDER_COLLISION;                                      //border collision
    }
-   if(X <= 1 || X >= 38)
+   if(snakeX[0] < BORDERTHICK || snakeX[0] >= (WIDTH - BORDERTHICK))    //if SNAKE head is in border
    {
-      return 1;
+      return EVT_BORDER_COLLISION;                                      //border collision
    }
-   return 0;
+   return EVT_NO_BORDER_COLLISION;                                      //else no border collision
 }
 
-void foodSpawnCollision()
+EVENTS selfCollision()                                                  ///Used to check for self collision
 {
-   foodPositionY = positionFoodY();
-   foodPositionX = positionFoodX();
-
-   for (i = 0; i < SNAKELENGTH + score; i++)
+   int i;
+   for (i = 2; i < SNAKELENGTH + score; i++)                            //for every bodypart
    {
-      if((foodPositionY == snakeY[i]) && (foodPositionX == snakeX[i]))
+      if(( snakeY[0] == snakeY[i]) && ( snakeX[0] == snakeX[i]))        //if head hits bodypart
       {
-         randomFoodY();
-         randomFoodX();
-         foodPositionY = positionFoodY();
-         foodPositionX = positionFoodX();
-         i = 0;
-
+         return EVT_SELF_COLLISION;                                     //self collision
       }
    }
+   return EVT_NO_SELF_COLLISION;                                        //else no collision
 }
 
-int foodNoCollisionY()
+EVENTS foodSpawnCollision()                              ///Used to check if food spawns in SNAKE current position
 {
-   return foodPositionY;
-}
+   int i;
+   foodY = positionFoodY();                              //retrieve food Y-coordinate
+   foodX = positionFoodX();                              //retrieve food X-coordinate
 
-int foodNoCollisionX()
-{
-   return foodPositionX;
-}
-
-void foodCollision()
-{
-   if((foodPositionY == snakeY[0]) && (foodPositionX == snakeX[0]))
+   for (i = 0; i < SNAKELENGTH + score; i++)             //for every bodypart
    {
-      foodSpawnCollision();
-      score++;
+      if(( foodY == snakeY[i]) && ( foodX == snakeX[i])) //if food hits bodypart
+      {
+         return EVT_FOOD_SPAWN_COLLISION;                //spawncollision
+      }
    }
+   return EVT_FOOD_SPAWN_NO_COLLISION;                   //else no spawn collision
+}
+
+int foodNoCollisionY()                                   ///Used to retrieve food Y-coordinates for use in other functions
+{
+   return foodY;
+}
+
+int foodNoCollisionX()                                   ///Used to retrieve food X-coordinates for use in other functions
+{
+   return foodX;
+}
+
+EVENTS foodCollision()                                   ///Used to check for food collision with SNAKE head
+{
+   if((foodY == snakeY[0]) && (foodX == snakeX[0]))      //if SNAKE head collides with food
+   {
+      return EVT_FOOD_COLLISION;                         //food collision
+   }
+   return EVT_NO_FOOD_COLLISION;                         //else no food collision
+}
+
+EVENTS collisionChecker()                                ///Used to check for Game Over conditions, combines self/border collision
+{
+   if (borderCollision() == EVT_BORDER_COLLISION)
+   {
+      return EVT_COLLISION;
+   }
+
+   if(selfCollision() == EVT_SELF_COLLISION)
+   {
+      return EVT_COLLISION;
+   }
+
+   return EVT_NO_COLLISION;
 }
