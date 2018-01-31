@@ -1,29 +1,22 @@
-#include "fsm.h"
-#include <dos.h>
 #include <conio.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <ctype.h>
 
-EVENTS keyboardInput(void)
+#include "fsm.h"
+
+EVENTS keyboardInput(void)             ///Used to control input to non-movement STATES in FSM
 {
    EVENTS event;
    char input, inputLowerCase;
-   fflush(stdin);
-   input = getch();
+   fflush(stdin);                      //flushes buffer
+   input = getch();                    //gets character
 
-   inputLowerCase = tolower(input);
+   inputLowerCase = tolower(input);    //Caps Lock security
 
-   switch(inputLowerCase)
+   switch(inputLowerCase)              //switch handles which event is associated with character and sends to FSM
    {
       case 'w':
          event = EVT_KEY_UP;
-         break;
-      case 'd':
-         event = EVT_KEY_RIGHT;
          break;
       case 's':
          event = EVT_KEY_DOWN;
@@ -31,11 +24,32 @@ EVENTS keyboardInput(void)
       case 'a':
          event = EVT_KEY_LEFT;
          break;
-      case 'p':
-         event = EVT_KEY_P;
+      case 'd':
+         event = EVT_KEY_RIGHT;
+         break;
+      case '1':
+         event = EVT_KEY_1;
+         break;
+      case '2':
+         event = EVT_KEY_2;
+         break;
+      case '7':
+         event = EVT_KEY_7;
+         break;
+      case '8':
+         event = EVT_KEY_8;
+         break;
+      case '9':
+         event = EVT_KEY_9;
          break;
       case 'm':
          event = EVT_KEY_M;
+         break;
+      case 'n':
+         event = EVT_KEY_N;
+         break;
+      case 'p':
+         event = EVT_KEY_P;
          break;
       case 'r':
          event = EVT_KEY_R;
@@ -46,33 +60,33 @@ EVENTS keyboardInput(void)
       case 'y':
          event = EVT_KEY_Y;
          break;
-      case 'n':
-         event = EVT_KEY_N;
+      case ')':
+         event = EVT_MODE_0;
          break;
-      case '1':
-         event = EVT_START_GAME;
+      case '!':
+         event = EVT_MODE_1;
          break;
-      case '2':
-         event = EVT_SHUT_DOWN;
-         break;
+      default:
          event = EVT_NO;
    }
    return event;
 }
 
 
-EVENTS keyboardMovement(void)
+EVENTS keyboardMovement(void)          ///Used to control input to movement STATES in FSM
 {
    EVENTS event;
-   char input;
+   char input, inputLowerCase;
 
-   fflush(stdin);
-   if(kbhit())
+   fflush(stdin);                      //flush buffer
+   if(kbhit())                         //if the keyboard is hit
    {
-      input = getch();
+      input = getch();                 //get character
    }
 
-   switch(input)
+      inputLowerCase = tolower(input); //Caps Lock security
+
+   switch(inputLowerCase)              //switch handles which event is associated with character and sends to FSM
    {
       case 'w':
          event = EVT_KEY_UP;
@@ -86,11 +100,14 @@ EVENTS keyboardMovement(void)
       case 'a':
          event = EVT_KEY_LEFT;
          break;
-      case 'p':
-         event = EVT_KEY_P;
-         break;
       case 'm':
          event = EVT_KEY_M;
+         break;
+      case 'n':
+         event = EVT_KEY_N;
+         break;
+      case 'p':
+         event = EVT_KEY_P;
          break;
       case 'r':
          event = EVT_KEY_R;
@@ -101,14 +118,11 @@ EVENTS keyboardMovement(void)
       case 'y':
          event = EVT_KEY_Y;
          break;
-      case 'n':
-         event = EVT_KEY_N;
-         break;
       case '1':
-         event = EVT_START_GAME;
+         event = EVT_KEY_1;
          break;
       case '2':
-         event = EVT_SHUT_DOWN;
+         event = EVT_KEY_2;
          break;
       default:
          event = EVT_NO;

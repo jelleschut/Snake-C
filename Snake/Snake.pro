@@ -9,7 +9,8 @@ SOURCES += main.c \
     keyboard.c \
     collision.c \
     position.c \
-    snakebody.c
+    score.c \
+    mode.c
 
 HEADERS += \
     fsm.h \
@@ -18,4 +19,5 @@ HEADERS += \
     collision.h \
     position.h \
     macros.h \
-    snakebody.h
+    score.h \
+    mode.h
